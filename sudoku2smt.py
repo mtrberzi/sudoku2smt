@@ -44,9 +44,32 @@ def parse_sudoku_line(line):
 
 initial_grid = [] # initial_grid[row][column] = entry
 
+# Helper functions to generate SMT2 expressions
+
+def entry(row,col):
+    return "x%d%d" % (row, col)
+
+def declare_entry(row,col):
+    e = entry(row, col)
+    print("(declare-const %s Int)" % e)
+    initial_entry = initial_grid[row][col]
+    if initial_entry == ".":
+        print("(assert (>= %s 1))" % e)
+        print("(assert (<= %s 9))" % e)
+    else:
+        print("(assert (= %s %s))" % (e, initial_entry))
+
 # Read 9 lines of input
 for i in range(9):
     line = sys.stdin.readline()
     grid_line = parse_sudoku_line(line)
     initial_grid.append(grid_line)
-pass
+
+# Declare all constants for grid entries
+for row in range(9):
+    for col in range(9):
+        declare_entry(row, col)
+
+# finally
+print("(check-sat)")
+print("(get-model)")
